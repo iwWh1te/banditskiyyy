@@ -1,59 +1,51 @@
-#include <QApplication>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QTimer>
+#include <QTWidgets>
+class MainWindow : public QMainWindow{
+public:
+    MainWindow();
+    void openButtonClick();
+protected:
+    void paintEvent(QPaintEvent *event);
+private:
+    QLabel *pathLabel;
+    QPushButton *openButton;
+    QLineEdit *pathEdit;
+    QPainter *painter;
+    QPixmap pixmap;
+    QString imgPath;
+};
+MainWindow::MainWindow(){
+    resize(1000,600);
+    setWindowTitle("gallery01");
+    QFont buttonFont("Time", 10, QFont::Bold);
 
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
+    pathLabel = new QLabel(this);
+    pathLabel->setGeometry(30, 10, 850, 35);
+    pathLabel->setText("Image path");
+    pathLabel->setFont(QFont("Time",20,QFont::Bold));
 
-    // Create QLineEdit widget
-    QLineEdit *lineEdit = new QLineEdit("Test", nullptr);
+    pathEdit=new QLineEdit(this);
+    pathEdit->setText("...");
+    pathEdit->setGeometry(30, 50, 850, 20);
 
-    // Create QPushButton widgets
-    QPushButton *widthBtn = new QPushButton("Width", nullptr);
-    QPushButton *heightBtn = new QPushButton("Height", nullptr);
+    openButton = new QPushButton("Open Picture",this);
+    openButton->setGeometry(30, 80, 100, 40);
+    openButton->setFont(buttonFont);
 
-    // Create layout and add widgets
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(lineEdit);
-    layout->addWidget(widthBtn);
-    layout->addWidget(heightBtn);
+    connect (openButton, &QPushButton::clicked,this, &MainWindow::openButtonClick);}
 
-    // Set layout for the main window
-    QWidget *window = new QWidget(nullptr);
-    window->setLayout(layout);
+void MainWindow::paintEvent(QPaintEvent *){
+    QPainter painter(this);
+    pixmap.load(imgPath);
+    painter.drawPixmap(50,150,pixmap);
+    painter.restore();}
 
-    // Create QTimer for width increase
-    QTimer *widthTimer = new QTimer(nullptr);
-    widthTimer->setInterval(1000);  // 1 second interval
+void MainWindow::openButtonClick(){
+    imgPath = pathEdit->text();
+    update();}
 
-    // Create QTimer for height increase
-    QTimer *heightTimer = new QTimer(nullptr);
-    heightTimer->setInterval(1000);  // 1 second interval
-
-    // Connect width timer to slot
-    QObject::connect(widthTimer, &QTimer::timeout, [=]() {
-        int newWidth = lineEdit->width() + 10;
-        lineEdit->setFixedWidth(newWidth);
-    });
-
-    // Connect height timer to slot
-    QObject::connect(heightTimer, &QTimer::timeout, [=]() {
-        int newHeight = lineEdit->height() + 10;
-        lineEdit->setFixedHeight(newHeight);
-    });
-
-    // Connect button clicks to timers
-    QObject::connect(widthBtn, &QPushButton::clicked, [=]() {
-        widthTimer->start();
-    });
-    QObject::connect(heightBtn, &QPushButton::clicked, [=]() {
-        heightTimer->start();
-    });
-
-    // Show main window
-    window->show();
-
+int main(int argc,char *argv[]){
+    QApplication app(argc,argv);
+    MainWindow mainWin;
+    mainWin.show();
     return app.exec();
 }
